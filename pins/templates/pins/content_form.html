@@ -1,0 +1,118 @@
+{% extends "pins/base.html" %}
+{% block title %}{% if is_edit %}Edit Pin{% else %}New Pin{% endif %}{% endblock %}
+{% block page_title %}{% if is_edit %}Edit Pin{% else %}Create a new pin{% endif %}{% endblock %}
+{% block page_subtitle %}<p class="text-xs text-slate-500">{% if is_edit %}Update the details below.{% else %}Add tech / AI content to your queue.{% endif %}</p>{% endblock %}
+{% block header_actions %}
+<a href="{% url 'pins:content_list' %}" class="btn-secondary"><i data-lucide="arrow-left" class="h-4 w-4"></i> Back to pins</a>
+{% endblock %}
+
+{% block content %}
+<form method="post" enctype="multipart/form-data" x-data="{ preview: {% if is_edit and pin.image %}'{{ pin.image.url }}'{% else %}null{% endif %} }" class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+    {% csrf_token %}
+
+    <!-- Image upload -->
+    <div class="card p-5 lg:col-span-1">
+        <h2 class="mb-3 text-sm font-bold text-slate-900">Pin image</h2>
+        <label @click="$refs.fileInput.click()"
+               class="relative flex aspect-[3/4] cursor-pointer flex-col items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 transition hover:border-brand-300 hover:bg-brand-50/40">
+            <template x-if="preview">
+                <img :src="preview" class="h-full w-full object-cover">
+            </template>
+            <template x-if="!preview">
+                <div class="flex flex-col items-center gap-2 px-4 text-center">
+                    <i data-lucide="image-plus" class="h-8 w-8 text-slate-400"></i>
+                    <p class="text-xs font-medium text-slate-500">Click to upload an image</p>
+                    <p class="text-[11px] text-slate-400">Recommended 1000×1500px (2:3)</p>
+                </div>
+            </template>
+        </label>
+        {{ form.image }}
+        <div class="mt-2 text-xs text-rose-600">{{ form.image.errors }}</div>
+
+        <div class="mt-4">
+            <label class="mb-1.5 block text-xs font-semibold text-slate-600">Alt text</label>
+            {{ form.alt_text }}
+        </div>
+
+        <div class="mt-4 flex items-center gap-2 rounded-xl border border-slate-100 bg-slate-50 px-3 py-2.5">
+            {{ form.is_ai_generated }}
+            <label class="text-xs font-medium text-slate-600">Flag as AI-generated content</label>
+        </div>
+    </div>
+
+    <!-- Details -->
+    <div class="card space-y-4 p-5 lg:col-span-2">
+        <h2 class="text-sm font-bold text-slate-900">Details</h2>
+
+        <div>
+            <label class="mb-1.5 block text-xs font-semibold text-slate-600">Title</label>
+            {{ form.title }}
+            <div class="mt-1 text-xs text-rose-600">{{ form.title.errors }}</div>
+        </div>
+
+        <div>
+            <label class="mb-1.5 block text-xs font-semibold text-slate-600">Description</label>
+            {{ form.description }}
+            <div class="mt-1 text-xs text-rose-600">{{ form.description.errors }}</div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+                <label class="mb-1.5 block text-xs font-semibold text-slate-600">Board</label>
+                {{ form.board }}
+            </div>
+            <div>
+                <label class="mb-1.5 block text-xs font-semibold text-slate-600">Category</label>
+                {{ form.category }}
+            </div>
+        </div>
+
+        <div>
+            <label class="mb-1.5 block text-xs font-semibold text-slate-600">Destination link</label>
+            {{ form.destination_link }}
+        </div>
+
+        <div>
+            <label class="mb-1.5 block text-xs font-semibold text-slate-600">Hashtags</label>
+            {{ form.hashtags }}
+        </div>
+
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+                <label class="mb-1.5 block text-xs font-semibold text-slate-600">Status</label>
+                {{ form.status }}
+            </div>
+            <div>
+                <label class="mb-1.5 block text-xs font-semibold text-slate-600">Schedule for</label>
+                {{ form.scheduled_for }}
+            </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 border-t border-slate-100 pt-4">
+            <a href="{% url 'pins:content_list' %}" class="btn-secondary">Cancel</a>
+            <button type="submit" class="btn-primary"><i data-lucide="save" class="h-4 w-4"></i> {% if is_edit %}Save changes{% else %}Save pin{% endif %}</button>
+        </div>
+    </div>
+</form>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Wire up the hidden file input to the Alpine preview + visible dropzone.
+    document.addEventListener('DOMContentLoaded', function () {
+        const input = document.querySelector('input[name="image"]');
+        if (!input) return;
+        input.addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const url = URL.createObjectURL(file);
+            const root = input.closest('form');
+            const img = root.querySelector('img');
+            const alpineRoot = root; // x-data lives on the form
+            if (window.Alpine) {
+                Alpine.$data(alpineRoot).preview = url;
+            }
+        });
+    });
+</script>
+{% endblock %}
