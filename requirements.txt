@@ -1,0 +1,14 @@
+Django>=5.0,<6.2
+Pillow>=10.0
+requests>=2.31
+
+# Supabase Postgres
+psycopg[binary]>=3.1
+dj-database-url>=2.1
+python-dotenv>=1.0
+
+# Optional: only needed if USE_SUPABASE_STORAGE=true (Supabase Storage for pin images)
+supabase>=2.4
+
+# AI image generation calls a self-hosted Stable Diffusion API over HTTP —
+# uses the `requests` package above, no other extra dependency needed.
